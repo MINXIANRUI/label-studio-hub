@@ -16,6 +16,12 @@ date: 2024-02-06 22:28:14
 !!! error Enterprise
     Many settings are only available in Label Studio Enterprise Edition. If you're using Label Studio Community Edition, see [Label Studio Features](label_studio_compare) to learn more.
 
+!!! error Starter Cloud
+    If you see an Enterprise badge: <span class="badge"></span>
+    
+    This means the setting is not available in Label Studio Starter Cloud. 
+
+
 ## General
 
 Use these settings to specify some basic information about the project. 
@@ -186,7 +192,7 @@ If an annotator skips a task, the task is moved to the bottom of their queue. Th
 
 If the annotator exits the label stream without labeling the skipped task, and then later re-enters the label stream, whether they see the task again depends on how task distribution is set up. 
 
-* Auto distribution: Whether they see the task again depends on if other annotators have since completed the task. If the task is still incomplete when the annotator re-enters the labeling stream, they can update label and re-submit the task. 
+* Automatic distribution: Whether they see the task again depends on if other annotators have since completed the task. If the task is still incomplete when the annotator re-enters the labeling stream, they can update label and re-submit the task. 
 * Manual distribution: The annotator will continue to see the skipped task until it is completed.  
 
 Skipped tasks are not marked as completed, and affect the Overall Project Progress calculation visible from the project Dashboard. (Meaning that the progress for a project that has skipped tasks will be less than 100%.)  
@@ -239,8 +245,6 @@ Unlike the other skip queue options, in this case skipped tasks do not adversely
 
 </dd>
 
-
-
 <dt id="predictions">Task Pre-Labeling</dt>
 
 <dd>
@@ -253,9 +257,7 @@ Unlike the other skip queue options, in this case skipped tasks do not adversely
 
 </dd>
 
-
 </dl>
-
 
 ## Review
 
@@ -277,7 +279,15 @@ Enable **Show before reviewing** to display a pop-up message to reviewers when t
 
 <dd>
 
-Configure what is required for a task to be considered reviewed. 
+Configure what is required for a task to be considered "reviewed."
+
+!!! note
+    This metric determines:
+
+    * **Review stream**: When a task is removed from the review queue.
+    * **Data Manager**: The value shown in the **Reviewed** column. 
+    * **Export**: Which tasks are included when you want to only include reviewed tasks in your export snapshot.
+    * **Dashboards**: Reviewed counts and related metrics. 
 
 <table>
 <thead>
@@ -289,7 +299,7 @@ Configure what is required for a task to be considered reviewed.
 <tr>
 <td>
 
-**Mark task as reviewed after it has at least 1 accepted annotation**
+**Task is reviewed after at least one accepted annotation**
 </td>
 <td>
 
@@ -300,7 +310,7 @@ In a task where multiple annotators submitted labels, the reviewer only needs to
 <tr>
 <td>
 
-**Mark task as reviewed after all annotations are processed**
+**Task is reviewed after all annotations are reviewed**
 </td>
 <td>
 
@@ -308,7 +318,95 @@ In a task where multiple annotators submitted labels, the reviewer needs to acce
 
 </td>
 </tr>
+<tr>
+<td>
+
+**Review only manually assigned tasks**
+</td>
+<td>
+
+If enabled, a reviewer can only see tasks to which they've been assigned. Otherwise, they can view all tasks that are ready for review.
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Show only finished tasks in the review stream**
+</td>
+<td>
+
+When enabled, a reviewer only sees tasks that have been completed by all required annotators. 
+
+If your project is using auto distribution, then this means a reviewer only sees tasks that have met the **Annotations per task minimum** threshold. 
+
+If your project is using manual distribution, then this means a reviewer only sees tasks in which all assigned annotators have submitted an annotation. 
+
+Note that in most cases, skipped tasks do not contribute towards meeting the minimum.  
+
+</td>
+</tr>
 </table>
+
+</dd>
+
+<dt id="task-ordering">Task Ordering</dt>
+
+<dd>
+
+Choose the order in which reviewers see tasks in the review stream.
+
+<table>
+<thead>
+    <tr>
+      <th style="width: 20%;">Field</th>
+      <th>Description</th>
+    </tr>
+</thead>
+<tr>
+<td>
+
+**By Task ID**
+</td>
+<td>
+
+Tasks are ordered by their numeric ID (ascending). Annotation order within a task remains stable.
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Random**
+<span class="badge"></span>
+</td>
+<td>
+
+Tasks are shown in randomized task order while preserving the stable order of annotations within each task. This mode enables **Task limit (%)** (see below).
+
+</td>
+</tr>
+</table>
+
+</dd>
+
+<dt id="task-limit">Task Limit (%) <span class="badge"></span></dt>
+
+<dd>
+
+Limit the portion of project tasks that are available to reviewers when **Task Ordering** is set to **Random**.
+
+Set this to a percentage from `0` to `100`. 
+
+!!! note
+    Note the following:
+
+    * This only applies only when sampling is **Random**. 
+    * If you enter a percentage of `≤0` or `≥100`, you will effectively disable limiting. 
+    * This limit is applied over the eligible task set after filters (for example, **Show only finished tasks**) are applied.
+    * If reviewers open the review stream by selecting tasks and then clicking **Label *n* Tasks** from the Data Manager, they will bypass the limit. 
+
+    For example, if a project has 1,000 tasks and the limit is set to 60%, at most ~600 tasks will be served for review under Random sampling. When the limit is reached, the API returns “no more annotations to review,” and the UI displays **Review finished**.
 
 </dd>
 
@@ -328,7 +426,7 @@ Configure what rejection options are available to reviewers.
 <tr>
 <td>
 
-**Requeue rejected tasks back to annotators**
+**Requeue rejected annotations back to annotators**
 </td>
 <td>
 
@@ -338,7 +436,7 @@ When a reviewer clicks **Reject**, the annotation is reassigned back to the anno
 </tr>
 <td>
 
-**Remove rejected tasks from labeling queue**
+**Remove rejected annotations from labeling queue**
 </td>
 <td>
 
@@ -369,11 +467,11 @@ Note that when you click **Remove**, the annotation is also marked as cancelled/
 
 </dd>
 
-<dt id="review-settings">Additional settings</dt>
+<dt id="data-manager">Data Manager</dt>
 
 <dd>
 
-Configure additional reviewer settings
+Configure what Data Manager features are available to reviewers.
 
 <table>
 <thead>
@@ -385,52 +483,26 @@ Configure additional reviewer settings
 <tr>
 <td>
 
-**Review only manually assigned tasks**
-</td>
-<td>
-
-If enabled, a reviewer can only see tasks to which they've been assigned. Otherwise, they can view all tasks that are ready for review.
-
-</td>
-</tr>
-<tr>
-<td>
-
-**Show only finished tasks in the review stream**
-</td>
-<td>
-
-When enabled, a reviewer only sees tasks that have been completed by all required annotators. 
-
-If your project is using auto distribution, then this means a reviewer only sees tasks that have met the **Annotations per task minimum** threshold. 
-
-If your project is using manual distribution, then this means a reviewer only sees tasks in which all assigned annotators have submitted an annotation. 
-
-Note that in most cases, skipped tasks do not contribute towards meeting the minimum.  
-
-</td>
-</tr>
-<tr>
-<td>
-
 **Show the Data Manager to reviewers**
 </td>
 <td>
 
-When disabled, reviewers can only enter the review stream. When enabled, reviewers can access the Data Manager, where they can select which tasks to review. 
-
-However, some information is still hidden from reviewers and they can only view a subset of the Data Manager columns. For example, they cannot see columns such as who the other Reviewers are. 
+When disabled, reviewers can only enter the review stream. When enabled, reviewers can access the Data Manager, where they can select which tasks to review. Some information is still hidden from reviewers and they can only view a subset of the Data Manager columns.
 
 </td>
 </tr>
 <tr>
 <td>
 
-**Reviewers must leave a comment on reject**
+**Show unused task data columns to reviewers in the Data Manager**
 </td>
 <td>
 
-When rejecting a task, the reviewer must leave a comment.
+If reviewers can view the Data Manager, this setting will hide unused columns from them.
+
+Unused Data Manager columns are columns that contain data that is not being used in the labeling configuration.
+
+For example, you may include meta or system data that you want to view as part of a project, but you don’t necessarily want to expose that data to reviewers.
 
 </td>
 </tr>
@@ -441,15 +513,13 @@ When rejecting a task, the reviewer must leave a comment.
 </td>
 <td>
 
-If reviewers can view the Data Manager, this setting controls whether they can access the Agreement column. 
+If reviewers can view the Data Manager, this setting controls whether they can access the **Agreement** column.
 
 </td>
 </tr>
 </table>
 
 </dd>
-
-</dl>
 
 
 ## Quality
@@ -463,7 +533,7 @@ Use these settings to determine task completeness and agreement metrics.
 <dd>
 
 !!! note
-    Overlap settings only apply when the project is using Auto distribution mode. If you are using Manual distribution mode, all tasks must be manually assigned - meaning that you are also manually determining overlap.  
+    Overlap settings only apply when the project is using Automatic distribution mode. If you are using Manual distribution mode, all tasks must be manually assigned - meaning that you are also manually determining overlap.  
 
 By default, each task only needs to be annotated by one annotator. If you want multiple annotators to be able to annotate tasks, increase the **Annotations per task minimum**.
 
@@ -482,11 +552,11 @@ The following options supersede what you specified under [**Annotations > Task S
 | Field          | Description    |
 | ------------- | ------------ |
 | **Show tasks with overlap first**         | If your overlap enforcement is less than 100% (meaning that only some tasks require multiple annotators), then the tasks that *do* require multiple annotations are shown first. <br /><br />If your overlap is 100%, then this setting has no effect.   |
-| **Show tasks with ground truth labels first** | Prioritize tasks that already have a ground truth label. |
+
 
 </dd>
 
-<dt id="annotation-limit">Annotation Limit</dt>
+<dt id="annotation-limit">Annotation Limit <span class="badge"></span></dt>
 
 <dd>
 
@@ -554,7 +624,7 @@ Use this option to determine what types of tasks annotators will see first.
 <tr>
 <td>
 
-**Minimum number of tasks for evaluation**
+**Minimum number of tasks for evaluation** <br /><span class="badge"></span>
 </td>
 <td>
 
@@ -565,7 +635,7 @@ The desired ground truth score threshold will not be assessed until the annotato
 <tr>
 <td>
 
-**Desired ground truth score threshold**
+**Desired ground truth score threshold** <br /><span class="badge"></span>
 </td>
 <td>
 
@@ -576,7 +646,7 @@ The agreement threshold the annotator must meet when evaluated against ground tr
 <tr>
 <td>
 
-**Pause annotator on failed evaluation**
+**Pause annotator on failed evaluation** <br /><span class="badge"></span>
 </td>
 <td>
 
@@ -693,7 +763,7 @@ Project members have access to published projects, depending on the permissions 
 
 Some users cannot be added or removed from the Members page at the project level. These users include administrators, who already have access to every project (outside of the Sandbox). This also includes users who have been added as members to the Workspace. Workspace membership is inherited by the projects within the workspace.   
 
-* If you have [Auto distribution](#distribute-tasks) enabled, users with the Annotator role are automatically assigned tasks when they are added as members. Similarly, by default, project members with the Reviewer role are able to begin reviewing annotations once the tasks are labeled. 
+* If you have [Automatic distribution](#distribute-tasks) enabled, users with the Annotator role are automatically assigned tasks when they are added as members. Similarly, by default, project members with the Reviewer role are able to begin reviewing annotations once the tasks are labeled. 
 
 * If you have [Manual distribution](#distribute-tasks) enabled, you need to add users with the Annotator role as project members before you can assign them to tasks. And if you have [**Review only manually assigned tasks**](#reviewing-options) enabled, the users with the Reviewer role must also be project members before they can be assigned to tasks. 
 
