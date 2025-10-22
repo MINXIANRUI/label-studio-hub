@@ -1385,15 +1385,6 @@ You can also create a storage connection using the Label Studio API.
 
 ## Local storage
 
-<div class="enterprise-only">
-
-!!! note
-    Local Storages are available for On-premise deployments only. The cloud version (app.heartex.com) doesn't support them.
-  
-</div>
-  
-If you have local files that you want to add to Label Studio from a specific directory, you can set up a specific local directory on the machine where LS is running as source or target storage. Label Studio steps through the directory recursively to read tasks.
-
 ### Prerequisites
 Add these variables to your environment setup:
 - `LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true`
@@ -1411,20 +1402,15 @@ In the Label Studio UI, do the following to set up the connection:
 <img src="/images/local-storage-settings.png" alt="Screenshot of the storage settings modal described in the preceding steps." class="gif-border">
   
 4. In the dialog box that appears, select **Local Files** as the storage type.
-5. In the **** field, type a name for the storage to appear in the Label Studio UI.
+5. In the **Storage Title** field, type a name for the storage to appear in the Label Studio UI.
 6. Specify an **Absolute local path** to the directory with your files. The local path must be an absolute path and include the `LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT` value. 
-
-    For example, if `LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/home/user`, then your local path must be `/home/user/dataset1`. For more about that environment variable, see [Run Label Studio on Docker and use local storage](https://labelstud.io/guide/start#Run-Label-Studio-on-Docker-and-use-Local-Storage).  
-
-!!! note
-    If you are using Windows, ensure that you use backslashes when entering your **Absolute local path**.  
-
-1. (Optional) In the **File Filter Regex** field, specify a regular expression to filter bucket objects. Use `.*` to collect all objects.
-2. (Optional) In the **Import method** dropdown, choose how to import your data:
-   - **Files** - Automatically creates a task for each storage object (e.g. JPG, MP3, TXT). Use this if you want to create Label Studio tasks from media files automatically. Use this option for labeling configurations with one source tag.
-   - **Tasks** - Treat each JSON, JSONL, or Parquet as a task definition (one or more tasks per file). Use this if you want to import tasks in Label Studio JSON format directly from your storage. Use this option for complex labeling configurations with HyperText or multiple source tags.    
-3. Click **Add Storage**.
-4.  Repeat these steps for **Add Target Storage** to use a local file directory for exporting.
+   For example, if `LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/home/user`, then your local path must be `/home/user/dataset1`. For more about that environment variable, see [Run Label Studio on Docker and use local storage](start.html#Run_Label_Studio_on_Docker_and_use_local_storage).    
+7. (Optional) In the **File Filter Regex** field, specify a regular expression to filter bucket objects. Use `.*` to collect all objects.
+8. (Optional) Toggle **Treat every bucket object as a source file**. 
+   - Enable this option if you want to create Label Studio tasks from media files automatically, such as JPG, MP3, or similar file types. Use this option for labeling configurations with one source tag.
+   - Disable this option if you want to import tasks in Label Studio JSON format directly from your storage. Use this option for complex labeling configurations with HyperText or multiple source tags.    
+9. Click **Add Storage**.
+10. Repeat these steps for **Add Target Storage** to use a local file directory for exporting.
 
 After adding the storage, click **Sync** to collect tasks from the bucket, or make an API call to [sync import storage](/api#operation/api_storages_localfiles_sync_create).
 
@@ -1435,21 +1421,14 @@ In those cases, you have to repeat all stages above to create local storage, but
 
 Differences with instruction above: 
 - **7. File Filter Regex** - stay empty (because you will specify it inside tasks)
-- **8. Import method** - select **"Tasks"** (because you will specify file references inside your JSON task definitions)
+- **8. Treat every bucket object as a source file** - switch off (because you will specify it inside tasks)
 
 Your window will look like this:
-<img src="/images/local-storage-settings2.png" alt="Screenshot of the local storage settings for user task." class="gif-border">
+<img src="/images/local-storage-settings2.png" alt="Screenshot of the local storage settings for user task." width=670 height=490 style="border: 1px solid #eee">
 
-Click **Add Storage**, but not use synchronization (don't touch button **Sync Storage**) after the storage creation, to avoid automatic task creation from storage files.
+Click **Add Storage**, but not use synchronization (don't touch button **Sync Storage**) after storage creation, to avoid automatic task creation from storage files.
 
-When referencing your files within a task, adhere to the following guidelines:
-* "Absolute local path" must be a sub-directory of LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT (see [6](https://labelstud.io/guide/storage.html#Set-up-connection-in-the-Label-Studio-UI-4)). 
-* All file paths must begin with `/data/local-files/?d=`.
-* In the following example, the first directory is `dataset1`. For instance, if you have mixed data types in tasks, including 
-    - audio files `1.wav`, `2.wav` within an `audio` folder and 
-    - image files `1.jpg`, `2.jpg` within an `images` folder, 
-  construct the paths as follows:
-
+Path to all your files inside task will start with string `/data/local-files/?d=`, also you have to add to this string full path to each file, that start from the first directory in **Absolute local path** of local storage after your `LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT`. In our example it is `dataset1`. For example, to specify multiple data types in the Label Studio JSON format, specifically an audio files `1.wav`, `2.wav` inside `audio` folder and an image files `1.jpg`, `2.jpg` inside `images` folder:
 ```
 [{
  "id": 1,
@@ -1466,18 +1445,10 @@ When referencing your files within a task, adhere to the following guidelines:
   }
 }]
 ```
+There are several ways to add your hand made task: API, web interface, another storage. The simplest one is to use **Import** button inside project main page. Drag and drop your json file inside window, after this push blue button **Import**.
+<img src="/images/upload-task.png" alt="Task upload via web." width="100%">
 
-There are several ways to add your custom task: API, web interface, another storage. The simplest one is to use **Import** button on the Data Manager page. Drag and drop your json file inside the window, then click the blue **Import** button .
-
-<img class="gif-border" src="/images/upload-task.png" alt="Task upload via web." width="100%">
-
-
-### Local Storage with Custom Task Format
-This video tutorial demonstrates how to setup Local Storage from scratch and import json tasks in a complex task format that are linked to the Local Storage files.
-
-<iframe class="video-border" width="100%" height="400vh" src="https://www.youtube.com/embed/lo6ncQajbdU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>  
-
-### Add storage with the Label Studio API
+#### Add storage with the Label Studio API
 You can also create a storage connection using the Label Studio API. 
 - See [Create new import storage](/api#operation/api_storages_localfiles_create) then [sync the import storage](/api#operation/api_storages_localfiles_sync_create). 
 - See [Create export storage](/api#operation/api_storages_export_localfiles_create) and after annotating, [sync the export storage](/api#operation/api_storages_export_localfiles_sync_create).

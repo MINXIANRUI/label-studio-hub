@@ -125,7 +125,7 @@ Don't forget to close the original [View](/tags/view.html) tag:
 </View>
 ```
 
-{% insertmd includes/nested-classification.md %}
+<!-- md nested-classification.md -->
 
 ## Related tags
 - [Text](/tags/text.html)
