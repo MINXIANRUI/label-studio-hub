@@ -167,6 +167,10 @@ const Model = types
       const tool = self.parent?.getToolsManager().findSelectedTool();
       return (tool?.disabled ?? false) || self.isReadOnly() || (!self.selected && !self.isDrawing);
     },
+    get isEditingAnyRegion() {
+      const isEditing = self.parent.annotation.regionStore.regions.some((r) => !r.transformMode);
+      return isEditing || !self.transformMode;
+    },
   }))
   .actions((self) => {
     return {
@@ -334,6 +338,8 @@ const Model = types
       },
 
       isHovered() {
+        if (self.isEditingAnyRegion) return false;
+
         const stage = self.groupRef.getStage();
         const pointer = stage.getPointerPosition();
 
@@ -534,6 +540,7 @@ const HtxVectorView = observer(({ item, suggestion }) => {
         <KonvaVector
           ref={(kv) => item.setKonvaVectorRef(kv)}
           initialPoints={Array.from(item.vertices)}
+          isActive={item.isDrawing || item.selected}
           isMultiRegionSelected={item.object?.selectedRegions?.length > 1}
           onFinish={(e) => {
             e.evt.stopPropagation();
@@ -633,7 +640,6 @@ const HtxVectorView = observer(({ item, suggestion }) => {
             if (item.parent.getSkipInteractions()) return;
             if (item.isDrawing) return;
             if (e.evt.altKey || e.evt.ctrlKey || e.evt.shiftKey || e.evt.metaKey) return;
-
             e.cancelBubble = true;
 
             // Allow selection regardless of whether the path is closed
@@ -643,7 +649,7 @@ const HtxVectorView = observer(({ item, suggestion }) => {
             }
 
             item.setHighlight(false);
-            item.onClickRegion(e);
+            if (!item.isEditingAnyRegion) item.onClickRegion(e);
           }}
           onMouseEnter={() => {
             if (store.annotationStore.selected.isLinkingMode) {

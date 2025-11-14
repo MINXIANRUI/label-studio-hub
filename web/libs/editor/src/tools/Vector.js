@@ -83,8 +83,10 @@ const _Tool = types
     const disposers = [];
     let down = false;
     let initialCursorPosition = null;
+    let captureListenerAttached = false;
 
     return {
+      // removed capture-phase listener to avoid breaking draw-over-region behavior
       handleToolSwitch(tool) {
         self.stopListening();
         if (self.getCurrentArea()?.isDrawing && tool.toolName !== "ZoomPanTool") {
@@ -159,7 +161,19 @@ const _Tool = types
         if (self.mode === "drawing") {
           return;
         }
+        // Aggressively consume the initiating event to prevent region selection
+        try {
+          if (e) e.cancelBubble = true;
+          if (e?.evt) {
+            e.evt.preventDefault?.();
+            e.evt.stopImmediatePropagation?.();
+            e.evt.stopPropagation?.();
+          }
+        } catch (_) {}
         down = true;
+        // Prevent other regions from handling the upcoming click while starting vector drawing
+        // Many regions check parent.getSkipInteractions() in their onClick
+        self.obj?.setSkipInteractions?.(true);
         self.startDrawing(x, y);
       },
 
@@ -171,8 +185,17 @@ const _Tool = types
         }
       },
 
-      mouseupEv(_, [x, y]) {
+      mouseupEv(e, [x, y]) {
         if (!self.isDrawing) return;
+        // Consume mouseup to avoid click selection that may follow
+        try {
+          if (e) e.cancelBubble = true;
+          if (e?.evt) {
+            e.evt.preventDefault?.();
+            e.evt.stopImmediatePropagation?.();
+            e.evt.stopPropagation?.();
+          }
+        } catch (_) {}
         const { x: rx, y: ry } = self.realCoordsFromCursor(x, y);
         down = false;
 
@@ -200,6 +223,12 @@ const _Tool = types
         self.currentArea = null;
         self.stopListening();
         self.annotation.afterCreateResult(currentArea, control);
+
+        // Re-enable interactions for other regions after finishing vector drawing.
+        // Use a microtask to ensure it stays enabled through the click event that follows mouseup.
+        setTimeout(() => {
+          self.obj?.setSkipInteractions?.(false);
+        }, 0);
       },
 
       setDrawing(drawing) {
