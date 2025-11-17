@@ -107,6 +107,33 @@ For a large labeling project with hundreds of thousands of tasks, do the followi
 
 Label Studio supports many common and standard formats for exporting completed labeling tasks. If you don't see a format that works for you, you can contribute one. For more information, see the [GitHub repository for the Label Studio Converter tool](https://github.com/HumanSignal/label-studio-converter).
 
+
+#### Text, audio, and video  tags
+
+| Export Format | Text | Audio | Labels | Choices | TextArea | TimeSeries | Video | Comments |
+|---------------|------|-------|--------|---------|----------|------------|-------|----------|
+| **ASR_MANIFEST** | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | Audio + TextArea only |
+| **CoNLL2003** | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | Text + Labels only |
+| **CSV** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | All project types |
+| **JSON** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | All project types |
+| **JSON_MIN** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | All project types |
+| **spaCy** | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | Text + Labels (via CoNLL2003) |
+| **TSV** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | All project types |
+
+#### Image segmentation tags
+
+| Export Format | BrushLabels | RectangleLabels | KeyPointLabels | PolygonLabels | Comments |
+|---------------|-------------|-----------------|----------------|---------------|----------|
+| **NumPy** | ✅ | ❌ | ❌ | ❌ |  |
+| **COCO** | ✅ | ✅ | ✅ | ✅ | See [note](#kpl-note) on KeyPointLabels |
+| **CSV** | ✅ | ✅ | ✅ | ✅ | All project types |
+| **JSON** | ✅ | ✅ | ✅ | ✅ | All project types |
+| **JSON_MIN** | ✅ | ✅ | ✅ | ✅ | All project types |
+| **Pascal VOC XML** | ❌ | ✅ | ❌ | ❌ | RectangleLabels only |
+| **TSV** | ✅ | ✅ | ✅ | ✅ | All project types |
+| **YOLO** | ❌ | ✅ | ✅ | ✅ | See [note](#kpl-note) on KeyPointLabels |
+
+
 ### ASR_MANIFEST
 
 Export audio transcription labels for automatic speech recognition as the JSON manifest format expected by [NVIDIA NeMo models](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/core/core.html). Supports audio transcription labeling projects that use the `Audio` tag with the `TextArea` tag.
@@ -115,7 +142,7 @@ Export audio transcription labels for automatic speech recognition as the JSON m
 {“audio_filepath”: “/path/to/audio.wav”, “text”: “the transcription”, “offset”: 301.75, “duration”: 0.82, “utt”: “utterance_id”, “ctm_utt”: “en_4156”, “side”: “A”}
 ```
 
-### Brush labels to NumPy and PNG
+### BrushLabels to NumPy and PNG
 
 Export your brush mask labels as NumPy 2d arrays and PNG images. Each label outputs as one image. Supports brush labeling image projects that use the `BrushLabels` tag.
 
@@ -123,8 +150,12 @@ Export your brush mask labels as NumPy 2d arrays and PNG images. Each label outp
 
 A popular machine learning format used by the [COCO dataset](http://cocodataset.org/#home) for object detection and image segmentation tasks. Supports bounding box and polygon image labeling projects that use the `BrushLabels`, `RectangleLabels`, `KeyPointLabels` (see note below), or `PolygonLabels` tags.
 
+!!! note "BrushLabels"
+    For annotations with BrushLabels, the BrushLabels masks are automatically converted to polygons on export.  
 
-{% details <b>KeyPointLabels Export Support</b> %}
+<br />
+
+{% details <b id="kpl-note">KeyPointLabels Export Support</b> %}
 
 If using `KeyPointLabels`, you will need to add the following to your labeling config:
 
@@ -326,7 +357,7 @@ Results are stored in a tab-separated tabular file with column names specified b
 
 ### YOLO
 
-Export object detection annotations in the YOLOv3 and YOLOv4 format. Supports object detection labeling projects that use the `RectangleLabels`  and `KeyPointLabels` tags. 
+Export object detection annotations in the YOLOv3 and YOLOv4 format. Supports object detection labeling projects that use the `RectangleLabels`, `PolygonLabels`,  and `KeyPointLabels` tags. 
 
 !!! note
     If using KeyPointLabels, see the note under [COCO](#COCO).
