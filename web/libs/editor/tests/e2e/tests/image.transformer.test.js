@@ -1,6 +1,7 @@
 const assert = require("assert");
 const Asserts = require("../utils/asserts");
 const Helpers = require("./helpers");
+const { waitForTransformerState } = require("../utils/async-helpers");
 
 Feature("Image transformer");
 
@@ -171,11 +172,18 @@ Data(shapesTable).Scenario(
 
     // Select the first region
     AtImageView.clickAt(...getCenter(bbox1));
+    I.wait(0.1); // Allow click to register
     AtOutliner.seeSelectedRegion();
+
+    // Wait for transformer to initialize and render
+    await waitForTransformerState(I, Shape.hasTransformer, "transformer");
 
     // Match if transformer exist with expectations in single selected mode
     isTransformerExist = await AtImageView.isTransformerExist();
     assert.strictEqual(isTransformerExist, Shape.hasTransformer);
+
+    // Wait for rotator to render
+    await waitForTransformerState(I, Shape.hasRotator, "rotator");
 
     // Match if rotator at transformer exist with expectations in single selected mode
     isTransformerExist = await AtImageView.isRotaterExist();
@@ -183,6 +191,10 @@ Data(shapesTable).Scenario(
 
     // Switch to move tool
     I.pressKey("v");
+    I.wait(0.1); // Allow tool switch to register
+
+    // Wait for move tool transformer to initialize
+    await waitForTransformerState(I, Shape.hasMoveToolTransformer, "transformer");
 
     // Match if rotator at transformer exist with expectations in single selected mode with move tool chosen
     isTransformerExist = await AtImageView.isTransformerExist();
@@ -190,6 +202,7 @@ Data(shapesTable).Scenario(
 
     // Deselect the previous selected region
     I.pressKey(["u"]);
+    I.wait(0.1); // Allow deselection to register
 
     // Select 2 regions
     AtImageView.drawThroughPoints(
@@ -200,10 +213,17 @@ Data(shapesTable).Scenario(
       "steps",
       10,
     );
+    I.wait(0.1); // Allow multi-selection to complete
+
+    // Wait for multi-selection transformer to initialize
+    await waitForTransformerState(I, Shape.hasMultiSelectionTransformer, "transformer");
 
     // Match if transformer exist with expectations in multiple selected mode
     isTransformerExist = await AtImageView.isTransformerExist();
     assert.strictEqual(isTransformerExist, Shape.hasMultiSelectionTransformer);
+
+    // Wait for multi-selection rotator to initialize
+    await waitForTransformerState(I, Shape.hasMultiSelectionRotator, "rotator");
 
     // Match if rotator exist with expectations in multiple selected mode
     isTransformerExist = await AtImageView.isRotaterExist();
@@ -246,14 +266,23 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasMoveToolTransfor
     // Transform the shape
     // Move the top anchor up for 50px (limited by image border) => {x1:50,y1:0,x2:150,y2:150}
     AtImageView.drawByDrag(100, 50, 0, -100);
+    I.waitTicks(3); // Wait for transformation to complete
     // Move the left anchor left for 50px (limited by image border) => {x1:0,y1:0,x2:150,y2:150}
     AtImageView.drawByDrag(50, 75, -300, -100);
+    I.waitTicks(3); // Wait for transformation to complete
     // Move the right anchor left for 50px => {x1:0,y1:0,x2:100,y2:150}
     AtImageView.drawByDrag(150, 75, -50, 0);
+    I.waitTicks(3); // Wait for transformation to complete
     // Move the bottom anchor down for 100px => {x1:0,y1:0,x2:100,y2:250}
     AtImageView.drawByDrag(50, 150, 10, 100);
+    I.waitTicks(3); // Wait for transformation to complete
     // Move the right-bottom anchor right for 200px and down for 50px => {x1:0,y1:0,x2:300,y2:300}
     AtImageView.drawByDrag(100, 250, 200, 50);
+    I.waitTicks(5); // Wait for final transformation to complete
+
+    // Wait for transformer to finish updating and region state to settle
+    I.wait(0.5);
+
     // Check resulting sizes
     const rectangleResult = await LabelStudio.serialize();
     const exceptedResult = Shape.byBBox(0, 0, 300, 300).result;
