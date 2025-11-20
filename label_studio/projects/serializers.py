@@ -97,6 +97,7 @@ class ProjectSerializer(FlexFieldsModelSerializer):
 
     queue_total = serializers.SerializerMethodField()
     queue_done = serializers.SerializerMethodField()
+    current_state = serializers.SerializerMethodField()
 
     @property
     def user_id(self):
@@ -197,6 +198,25 @@ class ProjectSerializer(FlexFieldsModelSerializer):
                 pass
         raise serializers.ValidationError('Color must be in "#RRGGBB" format')
 
+    def get_current_state(self, project):
+        """
+        Get the current FSM state of the project.
+        Uses StateManager to retrieve the stored state value.
+
+        Note: This returns only stored states. State inference is an enterprise
+        feature and should be overridden in LSE's project serializer.
+        """
+        try:
+            from fsm.state_manager import get_state_manager
+
+            StateManager = get_state_manager()
+            state_value = StateManager.get_current_state_value(project)
+            return state_value
+        except Exception:
+            # FSM may not be enabled or error occurred
+            # Don't fail serialization
+            return None
+
     class Meta:
         model = Project
         extra_kwargs = {
@@ -249,6 +269,7 @@ class ProjectSerializer(FlexFieldsModelSerializer):
             'queue_total',
             'queue_done',
             'config_suitable_for_bulk_annotation',
+            'current_state',
         ]
 
     def validate_label_config(self, value):
