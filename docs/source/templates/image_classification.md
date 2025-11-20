@@ -82,7 +82,7 @@ If you want the classification choices to appear to the left of the image, you c
 
 ```
 
-{% insertmd includes/nested-classification.md %}
+<!-- md nested-classification.md -->
 
 ## Related tags
 

@@ -13,37 +13,13 @@ section: "Import & Export"
 
 Integrate popular cloud and external storage systems with Label Studio to collect new items uploaded to the buckets, containers, databases, or directories and return the annotation results so that you can use them in your machine learning pipelines.
 
-<div class="opensource-only">
-
-| Storage | Community | Enterprise |
-|---|---|---|
-| [Amazon S3](#Amazon-S3) | ✅ | ✅ |
-| [Amazon S3 with IAM role](https://docs.humansignal.com/guide/storage#Set-up-an-S3-connection-with-IAM-role-access) | ❌ | ✅ |
-| [Google Cloud Storage](#Google-Cloud-Storage) | ✅ | ✅ |
-| [Google Cloud Storage WIF Auth](https://docs.humansignal.com/guide/storage#Google-Cloud-Storage-with-Workload-Identity-Federation-WIF) | ❌ | ✅ |
-| [Microsoft Azure Blob Storage](#Microsoft-Azure-Blob-storage) | ✅ | ✅ |
-| [Microsoft Azure Blob Storage with Service Principal](https://docs.humansignal.com/guide/storage#Azure-Blob-Storage-with-Service-Principal-authentication) | ❌ | ✅ |
-| [Databricks Files (UC Volumes)](https://docs.humansignal.com/guide/storage#Databricks-Files-UC-Volumes) | ❌ | ✅ |
-| [Redis database](#Redis-database)| ✅ | ✅ |
-| [Local storage](#Local-storage) | ✅ | ✅ |
- 
-</div>
-
-<div class="enterprise-only">
-
-| Storage | Community | Enterprise |
-|---|---|---|
-| [Amazon S3](#Amazon-S3) | ✅ | ✅ |
-| [Amazon S3 with IAM role](#Set-up-an-S3-connection-with-IAM-role-access) | ❌ | ✅ |
-| [Google Cloud Storage](#Google-Cloud-Storage) | ✅ | ✅ |
-| [Google Cloud Storage WIF Auth](#Google-Cloud-Storage-with-Workload-Identity-Federation-WIF) | ❌ | ✅ |
-| [Microsoft Azure Blob Storage](#Microsoft-Azure-Blob-storage) | ✅ | ✅ |
-| [Microsoft Azure Blob Storage with Service Principal](#Azure-Blob-Storage-with-Service-Principal-authentication) | ❌ | ✅ |
-| [Databricks Files (UC Volumes)](#Databricks-Files-UC-Volumes) | ❌ | ✅ |
-| [Redis database](#Redis-database)| ✅ | ✅ |
-| [Local storage](#Local-storage) (on-prem only) | ✅ | ✅ |
-
-</div>
+Set up the following cloud and other storage systems with Label Studio:
+- [Amazon S3](#Amazon-S3)
+- [Google Cloud Storage](#Google-Cloud-Storage)
+- [Microsoft Azure Blob storage](#Microsoft-Azure-Blob-storage)
+- [Redis database](#Redis-database)
+- [Local storage](#Local-storage) <div class="enterprise-only">(for On-prem only)</div>
+- [Databricks Files (UC Volumes)](#Databricks-Files-UC-Volumes)
 
 
 ## Troubleshooting
@@ -1294,7 +1270,7 @@ Complete the following fields and then click **Test connection**:
 | | |
 | --- | --- |
 | Storage Title | Enter a name for the storage connection to appear in Label Studio. | 
-| Storage Name | Enter the name of your Azure storage account. |
+| Storage Name | Enter the name of your Azure storage sccount. |
 | Container Name | Enter the name of a container within the Azure storage account. |
 | Tenant ID | Specify the **Directory (tenant) ID** from your App Registration. |
 | Client ID | Specify the **Application (client) ID** from your App Registration. |
@@ -1409,15 +1385,6 @@ You can also create a storage connection using the Label Studio API.
 
 ## Local storage
 
-<div class="enterprise-only">
-
-!!! note
-    Local Storages are available for On-premise deployments only. The cloud version (app.heartex.com) doesn't support them.
-  
-</div>
-  
-If you have local files that you want to add to Label Studio from a specific directory, you can set up a specific local directory on the machine where LS is running as source or target storage. Label Studio steps through the directory recursively to read tasks.
-
 ### Prerequisites
 Add these variables to your environment setup:
 - `LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true`
@@ -1435,20 +1402,15 @@ In the Label Studio UI, do the following to set up the connection:
 <img src="/images/local-storage-settings.png" alt="Screenshot of the storage settings modal described in the preceding steps." class="gif-border">
   
 4. In the dialog box that appears, select **Local Files** as the storage type.
-5. In the **** field, type a name for the storage to appear in the Label Studio UI.
+5. In the **Storage Title** field, type a name for the storage to appear in the Label Studio UI.
 6. Specify an **Absolute local path** to the directory with your files. The local path must be an absolute path and include the `LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT` value. 
-
-    For example, if `LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/home/user`, then your local path must be `/home/user/dataset1`. For more about that environment variable, see [Run Label Studio on Docker and use local storage](https://labelstud.io/guide/start#Run-Label-Studio-on-Docker-and-use-Local-Storage).  
-
-!!! note
-    If you are using Windows, ensure that you use backslashes when entering your **Absolute local path**.  
-
-1. (Optional) In the **File Filter Regex** field, specify a regular expression to filter bucket objects. Use `.*` to collect all objects.
-2. (Optional) In the **Import method** dropdown, choose how to import your data:
-   - **Files** - Automatically creates a task for each storage object (e.g. JPG, MP3, TXT). Use this if you want to create Label Studio tasks from media files automatically. Use this option for labeling configurations with one source tag.
-   - **Tasks** - Treat each JSON, JSONL, or Parquet as a task definition (one or more tasks per file). Use this if you want to import tasks in Label Studio JSON format directly from your storage. Use this option for complex labeling configurations with HyperText or multiple source tags.    
-3. Click **Add Storage**.
-4.  Repeat these steps for **Add Target Storage** to use a local file directory for exporting.
+   For example, if `LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/home/user`, then your local path must be `/home/user/dataset1`. For more about that environment variable, see [Run Label Studio on Docker and use local storage](start.html#Run_Label_Studio_on_Docker_and_use_local_storage).    
+7. (Optional) In the **File Filter Regex** field, specify a regular expression to filter bucket objects. Use `.*` to collect all objects.
+8. (Optional) Toggle **Treat every bucket object as a source file**. 
+   - Enable this option if you want to create Label Studio tasks from media files automatically, such as JPG, MP3, or similar file types. Use this option for labeling configurations with one source tag.
+   - Disable this option if you want to import tasks in Label Studio JSON format directly from your storage. Use this option for complex labeling configurations with HyperText or multiple source tags.    
+9. Click **Add Storage**.
+10. Repeat these steps for **Add Target Storage** to use a local file directory for exporting.
 
 After adding the storage, click **Sync** to collect tasks from the bucket, or make an API call to [sync import storage](/api#operation/api_storages_localfiles_sync_create).
 
@@ -1459,21 +1421,14 @@ In those cases, you have to repeat all stages above to create local storage, but
 
 Differences with instruction above: 
 - **7. File Filter Regex** - stay empty (because you will specify it inside tasks)
-- **8. Import method** - select **"Tasks"** (because you will specify file references inside your JSON task definitions)
+- **8. Treat every bucket object as a source file** - switch off (because you will specify it inside tasks)
 
 Your window will look like this:
-<img src="/images/local-storage-settings2.png" alt="Screenshot of the local storage settings for user task." class="gif-border">
+<img src="/images/local-storage-settings2.png" alt="Screenshot of the local storage settings for user task." width=670 height=490 style="border: 1px solid #eee">
 
-Click **Add Storage**, but not use synchronization (don't touch button **Sync Storage**) after the storage creation, to avoid automatic task creation from storage files.
+Click **Add Storage**, but not use synchronization (don't touch button **Sync Storage**) after storage creation, to avoid automatic task creation from storage files.
 
-When referencing your files within a task, adhere to the following guidelines:
-* "Absolute local path" must be a sub-directory of LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT (see [6](https://labelstud.io/guide/storage.html#Set-up-connection-in-the-Label-Studio-UI-4)). 
-* All file paths must begin with `/data/local-files/?d=`.
-* In the following example, the first directory is `dataset1`. For instance, if you have mixed data types in tasks, including 
-    - audio files `1.wav`, `2.wav` within an `audio` folder and 
-    - image files `1.jpg`, `2.jpg` within an `images` folder, 
-  construct the paths as follows:
-
+Path to all your files inside task will start with string `/data/local-files/?d=`, also you have to add to this string full path to each file, that start from the first directory in **Absolute local path** of local storage after your `LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT`. In our example it is `dataset1`. For example, to specify multiple data types in the Label Studio JSON format, specifically an audio files `1.wav`, `2.wav` inside `audio` folder and an image files `1.jpg`, `2.jpg` inside `images` folder:
 ```
 [{
  "id": 1,
@@ -1490,18 +1445,10 @@ When referencing your files within a task, adhere to the following guidelines:
   }
 }]
 ```
+There are several ways to add your hand made task: API, web interface, another storage. The simplest one is to use **Import** button inside project main page. Drag and drop your json file inside window, after this push blue button **Import**.
+<img src="/images/upload-task.png" alt="Task upload via web." width="100%">
 
-There are several ways to add your custom task: API, web interface, another storage. The simplest one is to use **Import** button on the Data Manager page. Drag and drop your json file inside the window, then click the blue **Import** button .
-
-<img class="gif-border" src="/images/upload-task.png" alt="Task upload via web." width="100%">
-
-
-### Local Storage with Custom Task Format
-This video tutorial demonstrates how to setup Local Storage from scratch and import json tasks in a complex task format that are linked to the Local Storage files.
-
-<iframe class="video-border" width="100%" height="400vh" src="https://www.youtube.com/embed/lo6ncQajbdU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>  
-
-### Add storage with the Label Studio API
+#### Add storage with the Label Studio API
 You can also create a storage connection using the Label Studio API. 
 - See [Create new import storage](/api#operation/api_storages_localfiles_create) then [sync the import storage](/api#operation/api_storages_localfiles_sync_create). 
 - See [Create export storage](/api#operation/api_storages_export_localfiles_create) and after annotating, [sync the export storage](/api#operation/api_storages_export_localfiles_sync_create).
@@ -1516,92 +1463,60 @@ If you're using Label Studio in Docker, you need to mount the local directory th
 
 <div class="enterprise-only">
 
-Connect Label Studio Enterprise to Databricks Unity Catalog (UC) Volumes to import files as tasks and export annotations as JSON back to your volumes. This connector uses the Databricks Files API and operates only in proxy mode (presigned URLs are not supported by Databricks).
+Connect Label Studio Enterprise to Databricks Unity Catalog (UC) Volumes to import files as tasks and export annotations as JSON back to your volumes. This connector uses the Databricks Files API and operates only in proxy mode (no presigned URLs are supported by Databricks).
 
 ### Prerequisites
-- A Databricks workspace URL (Workspace Host), for example `https://adb-12345678901234.1.databricks.com` (or Azure domain).
+- A Databricks workspace URL (Workspace Host), for example `https://adb-12345678901234.1.databricks.com` (or Azure domain)
+- A Databricks Personal Access Token (PAT) with permission to access the Files API
+- A UC Volume path under `/Volumes/<catalog>/<schema>/<volume>` with files you want to label
 
-    See [Create a workspace](https://docs.databricks.com/aws/en/admin/workspace/) and [Get identifiers for workspace objects](https://docs.databricks.com/aws/en/workspace/workspace-details#workspace-url).
-- A Databricks Personal Access Token (PAT) with permission to access the Files API. 
+References:
+- Databricks workspace: https://docs.databricks.com/en/getting-started/index.html
+- Personal access tokens: https://docs.databricks.com/en/dev-tools/auth/pat.html
+- Unity Catalog and Volumes: https://docs.databricks.com/en/files/volumes.html
 
-    You can generate tokens from **Settings > Developer**. See [Databricks personal access token authentication](https://docs.databricks.com/en/dev-tools/auth/pat.html). 
-- A UC Volume path under `/Volumes/<catalog>/<schema>/<volume>` with files you want to label. 
-  
-    See [What are Unity Catalog volumes?](https://docs.databricks.com/aws/en/volumes/).
+### Set up connection in the Label Studio UI
+1. Open Label Studio → project → **Settings > Cloud Storage**.
+2. Click **Add Source Storage**. Select **Databricks Files (UC Volumes)**.
+3. Configure the connection:
+   - Workspace Host: your Databricks workspace base URL (no trailing slash)
+   - Access Token: your PAT
+   - Catalog / Schema / Volume: Unity Catalog coordinates
+   - Click **Next** to open Import Settings & Preview
+4. Import Settings & Preview:
+   - Bucket Prefix (optional): relative subpath under the volume (e.g., `images/train`)
+   - File Name Filter (optional): regex to filter files (e.g., `.*\.json$`)
+   - Scan all sub-folders: enable for recursive listing; disable to list only current folder
+   - Click **Load preview** to verify files
+5. Click **Save** (or **Save & Sync**) to create the connection and sync tasks.
 
-### Create a source storage connection in the Label Studio UI
-
-From Label Studio, open your project and select **Settings > Cloud Storage > Add Source Storage**.
-
-Select **Databricks Files (UC Volumes)** and click **Next**.
-
-#### Configure Connection
-
-Complete the following fields and then click **Test connection**:
-
-<div class="noheader rowheader">
-
-| | |
-| --- | --- |
-| Storage Title | Enter a name for the storage connection to appear in Label Studio. | 
-| Workspace Host | Enter your workspace URL, for example `https://<workspace-identifier>.cloud.databricks.com` |
-| Access Token | Enter your personal access token that you generated in Databricks. |
-| Catalog <br> Schema <br> Volume | Specify your volume path (UC coordinates). You can find this from the **Catalog Explorer** in Databricks (see screenshot below). |
-
-</div>
-
-![Screenshot of Databricks UI and LS UI](/images/storages/databricks-volume.png)
-
-#### Import Settings & Preview
-
-Complete the following fields and then click **Load preview** to ensure you are syncing the correct data:
-
-<div class="noheader rowheader">
-
-| | |
-| --- | --- |
-| Bucket Prefix | Optionally, enter the directory name within the volume that you would like to use.  For example, `data-set-1` or `data-set-1/subfolder-2`.  | 
-| Import Method | Select whether you want create a task for each file in your container or whether you would like to use a JSON/JSONL/Parquet file to define the data for each task. |
-| File Name Filter | Specify a regular expression to filter bucket objects. Use `.*` to collect all objects. |
-| Scan all sub-folders | Enable this option to perform a recursive scan across subfolders within your container. |
-
-</div>
-
-#### Review & Confirm
-
-If everything looks correct, click **Save & Sync** to sync immediately, or click **Save** to save your settings and sync later.
+### Target storage (export)
+1. Open **Settings > Cloud Storage** → **Add Target Storage** → **Databricks Files (UC Volumes)**.
+2. Use the same Workspace Host/Token and UC coordinates.
+3. Set an Export Prefix (e.g., `exports/${project_id}`).
+4. Click **Save** and then **Sync** to push annotations as JSON files to your volume.
 
 !!! note "URI schema"
-    To reference Databricks files directly in task JSON (without using source storage), use Label Studio’s Databricks URI scheme:
+    To reference Databricks files directly in task JSON (without using an Import Storage), use Label Studio’s Databricks URI scheme:
     
     `dbx://Volumes/<catalog>/<schema>/<volume>/<path>`
     
     Example:
     
-    `{ "image": "dbx://Volumes/main/default/dataset/images/1.jpg" }`
-    
+    ```
+    { "image": "dbx://Volumes/main/default/dataset/images/1.jpg" }
+    ```
 
 
 !!! note "Troubleshooting"
-    - If your file preview returns zero files, verify the path under `/Volumes/<catalog>/<schema>/<volume>/<prefix?>` and your PAT permissions.
+    - If listing returns zero files, verify the path under `/Volumes/<catalog>/<schema>/<volume>/<prefix?>` and your PAT permissions.
     - Ensure the Workspace Host has no trailing slash and matches your workspace domain.
-    - If previews work but media fails to load, confirm proxy mode is allowed for your organization in Label Studio (**Organization > Usage & License > Features**) and network egress allows Label Studio to reach Databricks.
+    - If previews work but media fails to load, confirm proxy mode is allowed for your organization in Label Studio and network egress allows Label Studio to reach Databricks.
 
 
 !!! warning "Proxy and security"
     This connector streams data **through the Label Studio backend** with HTTP Range support. Databricks does not support presigned URLs, so this option is also not available in Label Studio.
 
-### Create a target storage connection in the Label Studio UI
-
-Repeat the steps from the previous section but using **Add Target Storage**. Use the same workspace host, token, and volume path (UC coordinates). 
-
-For your **Bucket Prefix**, set an export folder to use (e.g., `exports/${project_id}`) and determine whether you want to allow files to be deleted from target storage. 
-
-When file deletion is enabled, if you delete an annotation in Label Studio (via UI or API), Label Studio will also delete the corresponding exported JSON file from your target storage for this storage connection. 
-
-Note that this only affects files that were exported by that target storage, not your source media or tasks. Your PAT permissions must also allow deletion.
-
-After adding, click **Sync** to export annotations as JSON files to your target volume.
 
 </div>
 
@@ -1615,11 +1530,7 @@ Databricks Unity Catalog (UC) Volumes integration is available in Label Studio E
 - Stream media securely via the platform proxy (no presigned URLs)
 - Export annotations back to your Databricks Volume as JSON
 
-Learn more and see the full setup guide in the Enterprise documentation: 
-
-[Databricks Files (UC Volumes)](https://docs.humansignal.com/guide/storage#Databricks-Files-UC-Volumes). 
-
-If your organization needs governed access to Databricks data with Unity Catalog, consider [Label Studio Enterprise](https://humansignal.com/).
+Learn more and see the full setup guide in the Enterprise documentation: [Databricks Files (UC Volumes)](https://docs.humansignal.com/guide/storage#Databricks-Files-UC-Volumes). If your organization needs governed access to Databricks data with Unity Catalog, consider [Label Studio Enterprise](https://humansignal.com/).
 
 </div>
 

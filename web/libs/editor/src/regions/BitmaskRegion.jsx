@@ -176,16 +176,19 @@ const Model = types
 
           image.src = self.imageDataURL;
 
-          try {
-            await image.decode();
+          // Fallback onload
+          image.onload = () => {
             context.canvas.width = image.naturalWidth;
             context.canvas.height = image.naturalHeight;
             bitmask.width = image.naturalWidth;
             bitmask.height = image.naturalHeight;
-
             context.drawImage(image, 0, 0);
-
             self.finalizeRegion();
+          };
+
+          try {
+            await image.decode();
+            image.onload(); // on success of decode() onload() get called manually
           } catch (err) {
             console.log(err);
           }
@@ -194,6 +197,7 @@ const Model = types
       },
 
       finalizeRegion() {
+        if(!self.object.stageRef) return;
         self.composeMask();
         self.generateOutline();
         self.updateBBox();
@@ -352,6 +356,10 @@ const Model = types
         annotation.startAutosave();
 
         self.notifyDrawingFinished();
+
+        if(!annotation.store.settings.selectAfterCreate) {
+          annotation.unselectAll(true); // fix to take care of the "selectAfterCreate" setting
+        };
 
         // ...so we run this toggled function also delayed
         annotation.autosave && setTimeout(() => annotation.autosave());
